@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\MembershipType;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Requests\StoreMemberRequest;
@@ -42,9 +43,9 @@ class MemberController extends Controller
 
             User::create($validated);
 
-            return redirect()->route('data-member.index')->with('success', 'Admin berhasil dibuat.');
+            return redirect()->route('data-member.index')->with('success', 'Member berhasil dibuat.');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat membuat admin.']);
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat membuat member.']);
         }
     }
 
@@ -57,6 +58,16 @@ class MemberController extends Controller
         return response()->json($member);
     }
 
+    public function showProfile()
+    {
+        $user = Auth::user();
+        $membership = MembershipType::findOrFail($user->membership_type_id);
+        if ($user) {
+            return view('user.profile', compact('user','membership'));
+        } else {
+            return redirect()->route('login')->with('error', 'You need to log in first.');
+        }
+    }
     /**
      * Show the form for editing the specified resource.
      */
@@ -102,4 +113,6 @@ class MemberController extends Controller
         Artisan::call('membership:check');
         return redirect()->route('data-member.index')->with('success', 'Membership status checked successfully');
     }
+
+    
 }
